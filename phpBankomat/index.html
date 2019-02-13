@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>bankomat</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<?session_start();?>
+<body>
+    <div class="wrapper">
+        <div class="bankomat">
+            <h1>Банкомат</h1>
+            <h3>Введите сумму, которою хотите снять(только цифры):</h3>
+            <form action="app/atm.php" method="POST">
+                <div><input type="text" pattern="[0-9]{1,10}" title="Введите только цифры" name="money" required ></div>
+                <div>
+                    <button class="btn" type="submit" value="Выдать" >Выдать</button>
+                    <button class="btn btnRes" type="reset" value="Сбросить" >Сбросить</button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</body>
+</html>
