@@ -20,49 +20,58 @@ function cash(){
     if(isset($_SESSION['bank'])){
         $bank = $_SESSION['bank'];
     }else {
-        $bank = array(500 => 500, 200 => 500, 100 => 500, 50 => 400, 20 => 300, 10 => 200, 5 => 100);
-        $_SESSION['bank'] =$bank;
+        $bank = array(500 => 500, 200 => 500, 100 => 500, 50 => 400, 20 => 300, 10 => 200, 5 => 5);
     }
 
     if($_POST['money'] != null) {
-        $money = (int)$_POST['money'];
+        $value = (int)$_POST['money'];
+        $money = $value;
         $sumBank=0;
-        foreach ($bank as  $key => &$b){
+        foreach ($bank as  $key => $b){
             $sumBank += $key*$b;
         }
         if ($money%5 == 0 && $money <=$sumBank) {
             $bills = array(500 => 0, 200 => 0, 100 => 0, 50 => 0, 20 => 0, 10 => 0, 5 => 0);
             $rating = array(500, 200, 100, 50, 20, 10, 5);
 
-            $i = 0;
-            while ($money>=5){
-                if($money/$rating[$i]>=1){
+            $sum=0;
+            for ( $i = 0;  $i < count($rating); $i++){
+                if((int)$money/$rating[$i]>=1){
                     $temp = (int)($money/$rating[$i]);
-                    $countBank = searchCount($rating[$i], $bank);
+                    $countBank = searchCountBank($rating[$i], $bank);
                     if($temp >= $countBank) $temp =$countBank;
                     $money -= $rating[$i]*$temp;
+                    $sum += $rating[$i]*$temp;
                     countBill ($rating[$i],$temp, $bills);
                     editBank ($rating[$i],$temp, $bank);
                 }
-                $i++;
-            }
-            $_SESSION['bank'] =$bank;
-            $sum=0;
-            echo "<table>";
-            echo '<tr><td>Номинал купюры</td><td>Количество</td></tr>';
-            foreach ($bills as  $key => $b) {
-                if ($b != 0) {
-                    echo '<tr><td>' . $key . '</td><td>' . $b . '</td></tr>';
-                    $sum += $key * $b;
+           }
+            if($value == $sum){
+                $_SESSION['bank'] =$bank;
+
+                echo "<table>";
+                echo '<tr><td>Номинал купюры</td><td>Количество</td></tr>';
+                foreach ($bills as  $key => $b) {
+                    if ($b != 0) {
+                        echo '<tr><td>' . $key . '</td><td>' . $b . '</td></tr>';
+                    }
                 }
+                echo "</table>";
+                echo "<h2>Выдано  {$sum} грн. </h2>";
+            } else{
+                echo "<h3>Ошибка!! Вы заказали: {$value}, в банкомате недостаточно купюр</h3>";
+                echo "<p>Нажмите кнопку 'Вернуться' и введите другую суму кратной следующим купюрам:</p>";
+                   foreach ($bank as  $key=>$b){
+                    if ($b != 0) echo '<span>[' .$key. '] </span>';
+                }
+                echo "<p></p>";
             }
-            echo "</table>";
-            echo "<h2>Выдано  {$sum} грн. </h2>";
+
         }else if($money < 5){
             echo "<h3>Выдача невозможна: сумма меньше 5грн.</h3>";
             echo '<h4>Нажмите кнопку "Вернуться" и введите сумма больше 5грн</h4>';
         }else if($money > $sumBank){
-            echo "<h3>Ошибка!! Вы заказали: {$money}, в банкомате недостаточно купюр</h3>";
+            echo "<h3>Выдача невозможна: Вы заказали: {$money}, в банкомате недостаточно денег</h3>";
             echo '<h4>Нажмите кнопку "Вернуться" и введите меньшую суму(до '.$sumBank.'грн)</h4>';
         }else if($money%5 != 0){
             echo "<h3>Выдача невозможна: сумма не кратна 5грн.</h3>";
@@ -70,7 +79,7 @@ function cash(){
         }
     }
 
-    echo "<button class='btn'><a href='../index.html'>Вернуться</a></button>";
+    echo "<a href='../index.html'><button class='btn'>Вернуться</button></a>";
 
 }
 function countBill ($c, $r, &$arrStr){
@@ -79,7 +88,7 @@ function countBill ($c, $r, &$arrStr){
     }
 }
 
-function searchCount ($c, $bank){
+function searchCountBank ($c, $bank){
     foreach ($bank as $key => $b) {
         if ($key == $c) return $b;
     }
